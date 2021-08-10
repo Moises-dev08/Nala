@@ -1,0 +1,17 @@
+.home__options {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin-top: 20px;
+  margin-left: 20px;
+}
+
+.home__fileInput {
+  margin-top: 20px;
+  margin-left: 20px;
+}
+
+.home__button {
+  height: 40px;
+  width: 100px;
+}

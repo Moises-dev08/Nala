@@ -7,11 +7,53 @@
 }
 
 .home__fileInput {
+  display: flex;
+  justify-content: center;
   margin-top: 20px;
   margin-left: 20px;
 }
 
-.home__button {
+.home__buttonContainer {
+  display: flex;
+  justify-content: center;
   height: 40px;
-  width: 100px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.home__searchTitle {
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+.home__search {
+  display: flex;
+  flex-direction: row;
+}
+
+.home__chart {
+  margin-top: 20px;
+}
+
+.home__searchInput {
+  height: 20px;
+  align-self: center;
+}
+
+.home__promotions {
+  display: flex;
+}
+
+.home__promotionsList {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}
+
+.home__newEmployee {
+  display: flex;
+}
+
+.home__newEmployee > h5 {
+  margin-left: 10px;
 }

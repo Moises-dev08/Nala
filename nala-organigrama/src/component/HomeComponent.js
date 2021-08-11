@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import DataTable from "react-data-table-component";
 import ChartScreen from "../screen/ChartScreen";
-import { sum } from "../helperFunctions";
+import {
+  sum,
+  filterData,
+  filterPreviuosData,
+  employeesPromotions,
+} from "../helperFunctions";
 import XLSX from "xlsx";
 
 import "../styles.css";
@@ -13,7 +18,7 @@ const HomeComponent = () => {
   const [data, setData] = useState([]);
   const [totalPayments, setTotalPayments] = useState(0);
   const [promotions, setPromotions] = useState([]);
-  const [newWorker, setNewWorker] = useState("-");
+  const [newWorker, setNewWorker] = useState([]);
   const [showTable, setShowTable] = useState(true);
   const [showChart, setShowChart] = useState(false);
 
@@ -53,43 +58,43 @@ const HomeComponent = () => {
     setSearchText(searchTextEvent);
 
     if (searchTextEvent !== null) {
-      filterData(searchTextEvent, fileData);
+      const filteredByMonth = filterData(searchTextEvent, fileData);
+      const previousSalary = filterPreviuosData(searchTextEvent, fileData);
+      const newPromotion = employeesPromotions(filteredByMonth, previousSalary);
+      setPromotions(newPromotion);
+      setData(filteredByMonth);
+      //---- segun el mes seleccionado mostramos distintos detalles de ese mes --//
+      showMonthDetails(filteredByMonth);
     } else {
-      //--- cuando esta vacio el input le mostramos el array de datos --///
+      //--- limpiamos el search input box ---//
       clearInput();
     }
   };
 
   const clearInput = () => {
+    //---- seteamos las variables a su inital state ---//
     setSearchText("");
     setTotalPayments(0);
+    setPromotions([]);
+    setNewWorker([]);
+
+    //--- seteamos para tener la data orignial en la tabla de datos ---//
     setData(fileData);
-    setNewWorker("-");
-  };
-
-  //--- filtramos segun el nombre que se escribe en el input --//
-  const filterData = (searchTextEvent, fileData) => {
-    let filteredByMonth = fileData.filter((data) => {
-      return data.Mes.slice(0, 1) === searchTextEvent;
-    });
-
-    setData(filteredByMonth);
-    showMonthDetails(filteredByMonth);
   };
 
   const showMonthDetails = (filteredByMonth) => {
-    //--- obtain total months payments ---//
+    //--- obtenemos el total de salarios ---//
     const salaryArray = filteredByMonth.map((value) => {
-      const property = `Sueldo  bruto`;
-      return parseInt(value[property]);
+      const salaryProp = `Sueldo  bruto`;
+      return parseInt(value[salaryProp]);
     });
 
     const salaryResult = sum(salaryArray);
 
     setTotalPayments(salaryResult);
 
-    //--- see if there is a new employee in the company for the current month ---//
-    const allEmployees = filteredByMonth.map((value) => {
+    //--- verificamos si hay un nuevo empleado en la empresa ---//
+    const newEmployee = filteredByMonth.map((value) => {
       const entryDate = `Fecha de ingreso`;
       const currentDate = `Mes`;
       const name = `Nombre `;
@@ -120,6 +125,7 @@ const HomeComponent = () => {
     });
   };
 
+  //---- manejamos el boton para que cambie de funcion al hacer click ----//
   const displaySection = () => {
     setShowTable(!showTable);
     setShowChart(!showChart);
@@ -134,20 +140,40 @@ const HomeComponent = () => {
 
   return (
     <>
-      <div className="home__fileInput"></div>
-      <input type="file" accept=".xlsx" onChange={handleUpload} />
+      <div className="home__fileInput">
+        <input type="file" accept=".xlsx" onChange={handleUpload} />
+      </div>
+
       {fileData && showTable && (
-        <>
-          <button className="home__button" onClick={() => displaySection()}>
-            Ver Organigrama
-          </button>
-          <div className="home__options">
-            <h4>Buscar mes</h4>
-            <input type="text" onChange={(e) => handleSearchInput(e)} />
-            <h4>Total pagado del mes: $ {totalPayments}</h4>
-            <h4>Aumento de sueldo a : {promotions ? promotions : "-"}</h4>
-            <h4>Nuevo empleado/a: {newWorker ? newWorker : "-"}</h4>
+        <div>
+          <div className="home__buttonContainer">
+            <button onClick={() => displaySection()}>Ver Organigrama</button>
           </div>
+          <div className="home__search">
+            <h4 className="home__searchTitle">Buscar mes</h4>
+            <input
+              className="home__searchInput"
+              type="text"
+              onChange={(e) => handleSearchInput(e)}
+            />
+          </div>
+
+          <div className="home__options">
+            <h4>Total pagado del mes: $ {totalPayments}</h4>
+            <div className="home__promotions">
+              <h4>Aumento de sueldo: </h4>
+              <div className="home__promotionsList">
+                {promotions.map((person) => (
+                  <h5>{person}</h5>
+                ))}
+              </div>
+            </div>
+            <div className="home__newEmployee">
+              <h4>Nuevo empleado/a: </h4>
+              <h5> {newWorker}</h5>
+            </div>
+          </div>
+
           <DataTable
             columns={columns}
             data={data}
@@ -156,16 +182,18 @@ const HomeComponent = () => {
             fixedHeader
             fixedHeaderScrollHeight="600px"
             highlightOnHover
-            title="Datos:"
           />
-        </>
+        </div>
       )}
+
       {showChart && (
         <>
-          <button className="home__button" onClick={() => displaySection()}>
-            Ver tabla de datos
-          </button>
-          <ChartScreen data={fileData} />
+          <div className="home__buttonContainer">
+            <button onClick={() => displaySection()}>Ver tabla de datos</button>
+          </div>
+          <div className="home__chart">
+            <ChartScreen data={fileData} />
+          </div>
         </>
       )}
     </>

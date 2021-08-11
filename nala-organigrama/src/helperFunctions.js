@@ -31,3 +31,42 @@ export const getTeamArray = (data, subAreaName) => {
   });
   return teamArray;
 };
+
+//--- filtramos segun el nombre que se escribe en el input --//
+export const filterData = (searchTextEvent, fileData) => {
+  return fileData.filter((data) => {
+    return data.Mes.slice(0, 1) === searchTextEvent;
+  });
+};
+
+//--- usamos el mes que se busca en el input search y le restamos 1 para obtener el dato del mes anterior --//
+export const filterPreviuosData = (searchTextEvent, fileData) => {
+  return fileData.filter((data) => {
+    const previousMonth = searchTextEvent - 1;
+    return parseInt(data.Mes.slice(0, 1)) === previousMonth;
+  });
+};
+
+//--- comparamos el mes seleccionado en el input con el mes anterior para ver si hay diferencia de sueldo ---//
+
+export const employeesPromotions = (selectedMonth, previousMonth) => {
+  const compare = (month) => {
+    return previousMonth.filter((prevMonth) => {
+      const salaryProp = `Sueldo  bruto`;
+      const nameProp = `Nombre `;
+
+      return (
+        month[nameProp] === prevMonth[nameProp] &&
+        month[salaryProp] !== prevMonth[salaryProp]
+      );
+    });
+  };
+  const result = selectedMonth.map((month) => {
+    return compare(month);
+  });
+
+  return result.flat().map((name) => {
+    const nameProp = `Nombre `;
+    return name[nameProp];
+  });
+};
